@@ -1,31 +1,54 @@
-import csv
+
+import sqlite3
+
 class BusinessOwner:
     def __init__(self):
         self.username = None
         self.password = None
 
     def businessOwnerLogin(self):
-        actList = []
-        with open('businessOwnerLogin.csv','r+',newline ="") as f:
-            r = csv.reader(f)
-            data = list(r)
-            for i in data:
-                for j in i :
-                    actList.append(j)
+        con = sqlite3.Connection('businessownerDb.sqlite3')
+        cur = con.cursor()
+        cur.execute('CREATE TABLE IF NOT EXISTS "BusinessOwnerData" (username text, password text);')
+        cur.execute('''INSERT INTO BusinessOwnerData (username, password) VALUES ('shubha', 'shubha12')''')
+        cur.execute('''INSERT INTO BusinessOwnerData (username, password) VALUES ('rashel', 'rashel12')''')
+        con.commit()
 
-        while (True):
+        while True:
             print("----------------------------------------------------------------")
-            print()
             self.username = input("Enter  username  :")
             self.password = input("Enter  password  :")
-            if self.username == str(actList[0]) and self.password == str(actList[1]):
-                print()
-                print("Login successfully")
-                break
+
+            result = con.execute("SELECT * FROM BusinessOwnerData WHERE username=? AND password=?",
+                                 (self.username, self.password)).fetchone()
+
+            if result:
+                print("User login success:", result)
             else:
-                print("Enter correct username and password")
-            print()
-            print("---------------------------------------------------------------")
+                print("User not found")
+            con.close()
+            break
+        return self.username
 
+    def businessOwnerNewUser(self):
 
+        con = sqlite3.Connection('businessownerDb.sqlite3')
+        cur = con.cursor()
+        cur.execute('CREATE TABLE IF NOT EXISTS "BusinessOwnerData" (username text, password text);')
+        self.username = input("Enter  username  :")
+        self.password = input("Enter  password  :")
 
+        cur.execute('''INSERT INTO BusinessOwnerData (username, password) VALUES (?, ?)''', (self.username, self.password))
+
+        con.commit()
+
+        result = con.execute("SELECT * FROM BusinessOwnerData WHERE username=? AND password=?",
+                             (self.username, self.password)).fetchone()
+
+        if result:
+            print("User login success:", result)
+        else:
+            print("User not found")
+        con.close()
+
+        return self.username
